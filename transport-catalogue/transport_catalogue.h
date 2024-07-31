@@ -42,7 +42,7 @@ public:
 	BusStat GetBusProperty (std::string_view bus_name) const;
 	
 	// Запрос списка автобусов для конкретной остановки
-	std::set<std::string> GetStopProperty(std::string_view stop_name) const;
+	const std::set<std::string>& GetStopProperty(std::string_view stop_name) const;
 
 private:
 	// БД для автобусов и остановок
@@ -55,16 +55,18 @@ private:
 	
 	// Справочник автобусов для остановки
 	std::unordered_map<std::string_view, std::set<std::string>> bus_list_for_stop_;
+
+	// Запрос кол-ва уникальных остановок
+	int GetBusUniqStopCount (const TransportCatalogue::Bus& bus) const;
+
+	// Запрос кол-ва всех остановок
+	int GetBusAllStopCount (const TransportCatalogue::Bus& bus) const;
+
+	// Запрос длины маршрута
+	double GetBusRouteLength (const TransportCatalogue::Bus& bus) const;
 };
 
-// Запрос кола-ва уникальных остановок
-int GetBusUniqStopCount (const TransportCatalogue::Bus& bus);
 
-// Запрос кол-ва всех остановок
-int GetBusAllStopCount (const TransportCatalogue::Bus& bus);
-
-// Запрос длины маршрута
-double GetBusRouteLength (const TransportCatalogue::Bus& bus);
 
 }
 

@@ -22,7 +22,7 @@ void stat_reader::PrintBusProperty(const trans_cat::TransportCatalogue& transpor
 void stat_reader::PrintStopProperty(const trans_cat::TransportCatalogue& tansport_catalogue, std::string_view stop_id, std::ostream& output){
     using namespace std::string_literals;
     trans_cat::TransportCatalogue::Stop* stop = tansport_catalogue.GetStop(stop_id);
-    std::set<std::string> bus_list = tansport_catalogue.GetStopProperty(stop_id);
+    const std::set<std::string>& bus_list = tansport_catalogue.GetStopProperty(stop_id);
 
     if(stop == nullptr){
         output << "Stop "s << stop_id << ": not found\n";
@@ -68,6 +68,17 @@ void stat_reader::ParseAndPrintStat(const trans_cat::TransportCatalogue& transpo
         case input_reader::request::RequestType::Unknown : {
             break;
         }
+    }
+}
+
+void stat_reader::ReadAndProcessRequest (std::istream& input, std::ostream& output, const trans_cat::TransportCatalogue& catalogue){
+    int stat_request_count;
+    input >> stat_request_count >> std::ws;
+    
+    for (int i = 0; i < stat_request_count; ++i) {
+        std::string line;
+        std::getline(input, line);
+        ParseAndPrintStat(catalogue, line, output);
     }
 }
 

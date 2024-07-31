@@ -20,16 +20,20 @@ void trans_cat::TransportCatalogue::AddStop (const std::string& stop_name, geo::
 
 // Запросы к БД
 trans_cat::TransportCatalogue::Bus* trans_cat::TransportCatalogue::GetBus (std::string_view bus_name) const {
-    if(bus_directory_.count(bus_name) > 0){
-        return bus_directory_.at(bus_name);
+    auto it = bus_directory_.find(bus_name);
+    
+    if(it != bus_directory_.end()){
+        return it -> second;
     }
 
     return nullptr;
 }
 	
 trans_cat::TransportCatalogue::Stop* trans_cat::TransportCatalogue::GetStop (std::string_view stop_name) const {
-    if(stop_directory_.count(stop_name) > 0){
-        return stop_directory_.at(stop_name);
+    auto it = stop_directory_.find(stop_name);
+
+    if(it != stop_directory_.end()){
+        return it->second;
     }
 
     return nullptr;
@@ -45,16 +49,18 @@ trans_cat::TransportCatalogue::BusStat trans_cat::TransportCatalogue::GetBusProp
     return {GetBusAllStopCount(*bus), GetBusUniqStopCount(*bus), GetBusRouteLength(*bus)};
 }
 
-std::set<std::string> trans_cat::TransportCatalogue::GetStopProperty(std::string_view stop_name) const {
+const std::set<std::string>& trans_cat::TransportCatalogue::GetStopProperty(std::string_view stop_name) const {
+    static std::set<std::string> result;
+    auto it = bus_list_for_stop_.find(stop_name);
 
-    if(!bus_list_for_stop_.count(stop_name)){
-        return {};
+    if(it != bus_list_for_stop_.end()){
+        result = it -> second;
     }
 
-    return bus_list_for_stop_.at(stop_name);
+    return result;
 }
 
-int trans_cat::GetBusUniqStopCount(const TransportCatalogue::Bus& bus){
+int trans_cat::TransportCatalogue::GetBusUniqStopCount(const TransportCatalogue::Bus& bus) const {
     std::unordered_set<std::string> stops;
 
     for(const auto& stop : bus.stops_for_bus){
@@ -64,11 +70,11 @@ int trans_cat::GetBusUniqStopCount(const TransportCatalogue::Bus& bus){
     return static_cast<int>(stops.size());
 }
 
-int trans_cat::GetBusAllStopCount(const TransportCatalogue::Bus& bus){
+int trans_cat::TransportCatalogue::GetBusAllStopCount(const TransportCatalogue::Bus& bus) const {
     return static_cast<int>(bus.stops_for_bus.size());
 }
 
-double trans_cat::GetBusRouteLength(const TransportCatalogue::Bus& bus){
+double trans_cat::TransportCatalogue::GetBusRouteLength(const TransportCatalogue::Bus& bus) const {
     double result = 0.0;
 
     for(size_t i = 1; i < bus.stops_for_bus.size(); ++i){
