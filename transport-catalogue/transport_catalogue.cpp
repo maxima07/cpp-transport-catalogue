@@ -2,6 +2,13 @@
 
 #include <unordered_set>
 
+// Хеширование дистанции между остановками
+size_t trans_cat::TransportCatalogue::DistHasher::operator()(const std::pair<const Stop*, const Stop*>& stops) const {
+    size_t h_first_stop = dist_hasher_(stops.first);
+    size_t h_sec_stop = dist_hasher_(stops.second);
+    return h_first_stop + h_sec_stop * 37;
+}
+
 // добавление в БД автобусов и остановок.
 void trans_cat::TransportCatalogue::AddBus (const std::string& bus_name, std::vector<Stop*>&& stops_for_bus){
     bus_data_.push_back(Bus{bus_name, std::move(stops_for_bus)});   // Добавление в БД автобуса
@@ -10,6 +17,11 @@ void trans_cat::TransportCatalogue::AddBus (const std::string& bus_name, std::ve
     for(const Stop* stop : bus_data_.back().stops_for_bus){
         bus_list_for_stop_[stop->stop_name].insert(bus_data_.back().bus_name);  // Добавление автобуса в справочник для конкретной остановки
     }
+}
+
+// Добавление расстояния между двумя остановками
+void trans_cat::TransportCatalogue::SetDistBetweenStops (const Stop* stop_from, const Stop* stop_to, size_t distance){
+    dist_directory_[std::make_pair(stop_from, stop_to)] = distance;
 }
 	
 void trans_cat::TransportCatalogue::AddStop (const std::string& stop_name, geo::Coordinates stop_coord){
@@ -43,10 +55,10 @@ trans_cat::TransportCatalogue::BusStat trans_cat::TransportCatalogue::GetBusProp
     const Bus* bus = GetBus(bus_name);
 
     if(!bus){
-        return {0, 0, 0.0};
+        return {0, 0, 0.0, 0.0};
     }
 
-    return {GetBusAllStopCount(*bus), GetBusUniqStopCount(*bus), GetBusRouteLength(*bus)};
+    return {GetBusAllStopCount(*bus), GetBusUniqStopCount(*bus), GetBusGeoRouteLength(*bus), GetBusRouteLength(*bus)};
 }
 
 const std::set<std::string>& trans_cat::TransportCatalogue::GetStopProperty(std::string_view stop_name) const {
@@ -55,6 +67,23 @@ const std::set<std::string>& trans_cat::TransportCatalogue::GetStopProperty(std:
 
     if(it != bus_list_for_stop_.end()){
         result = it -> second;
+    }
+
+    return result;
+}
+
+size_t trans_cat::TransportCatalogue::GetDistBetweenStops (const Stop* stop_from, const Stop* stop_to) const {
+    auto it = dist_directory_.find({stop_from, stop_to});
+    size_t result = 0;
+
+    if(it != dist_directory_.end()){
+        result = it->second;
+    } else {
+        it = dist_directory_.find({stop_to, stop_from});
+
+        if(it != dist_directory_.end()){
+            result = it->second;
+        }
     }
 
     return result;
@@ -74,7 +103,7 @@ int trans_cat::TransportCatalogue::GetBusAllStopCount(const TransportCatalogue::
     return static_cast<int>(bus.stops_for_bus.size());
 }
 
-double trans_cat::TransportCatalogue::GetBusRouteLength(const TransportCatalogue::Bus& bus) const {
+double trans_cat::TransportCatalogue::GetBusGeoRouteLength(const TransportCatalogue::Bus& bus) const {
     double result = 0.0;
 
     for(size_t i = 1; i < bus.stops_for_bus.size(); ++i){
@@ -83,3 +112,13 @@ double trans_cat::TransportCatalogue::GetBusRouteLength(const TransportCatalogue
 
     return result;
 }
+
+double trans_cat::TransportCatalogue::GetBusRouteLength (const TransportCatalogue::Bus& bus) const {
+    double result = 0.0;
+
+    for(size_t i = 0; i < bus.stops_for_bus.size() - 1; ++i){
+        result += static_cast<double>(GetDistBetweenStops(bus.stops_for_bus[i], bus.stops_for_bus[i + 1]));
+    }
+
+    return result;
+} 

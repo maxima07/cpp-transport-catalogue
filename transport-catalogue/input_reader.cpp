@@ -28,9 +28,10 @@ geo::Coordinates ParseCoordinates(std::string_view str) {
     }
 
     auto not_space2 = str.find_first_not_of(' ', comma + 1);
+    auto comma2 = str.find(',', comma + 1);
 
     double lat = std::stod(std::string(str.substr(not_space, comma - not_space)));
-    double lng = std::stod(std::string(str.substr(not_space2)));
+    double lng = std::stod(std::string(str.substr(not_space2, comma2 - not_space2)));
 
     return {lat, lng};
 }
@@ -114,17 +115,29 @@ void input_reader::InputReader::ParseLine(std::string_view line) {
     }
 }
 
-void input_reader::InputReader::ApplyCommands([[maybe_unused]] trans_cat::TransportCatalogue& catalogue) const {
-    std::vector<input_reader::request::CommandDescription> buffer;
+std::pair<std::string_view, size_t> input_reader::InputReader::ParseDistance (std::string_view line){
+    auto f_sp_pos = line.find_first_not_of(' ');
+    auto f_m_pos = line.find('m');
+    auto f_t_pos = line.find('t', f_m_pos + 1);
+
+    size_t distance = stoull(std::string(line.substr(f_sp_pos, f_m_pos - f_sp_pos)));
+    std::string_view stop = line.substr(line.find_first_not_of(' ', f_t_pos + 2));
+    return std::make_pair(stop, distance);
+}
+
+void input_reader::InputReader::ApplyCommands([[maybe_unused]] trans_cat::TransportCatalogue& catalogue){
+    std::vector<input_reader::request::CommandDescription> bus_buffer;
+    std::vector<input_reader::request::CommandDescription> stop_buffer;
     
     for(const input_reader::request::CommandDescription& comand : commands_){
-        switch (input_reader::request::GetRequestType(comand.command)){
+        switch (input_reader::request::GetRequestType(comand.comand)){
             case input_reader::request::RequestType::Stop : {
-                catalogue.AddStop(comand.id, ParseCoordinates(comand.description));\
+                stop_buffer.push_back(comand);
+                catalogue.AddStop(comand.id, ParseCoordinates(comand.description));
                 break;
             }
             case input_reader::request::RequestType::Bus : {
-                buffer.push_back(comand);
+                bus_buffer.push_back(comand);
                 break;
             }
             case input_reader::request::RequestType::Unknown : {
@@ -133,7 +146,18 @@ void input_reader::InputReader::ApplyCommands([[maybe_unused]] trans_cat::Transp
         }
     }
 
-    for(input_reader::request::CommandDescription comand : buffer){
+    for(input_reader::request::CommandDescription& comand : stop_buffer){
+        std::vector<std::string_view> split_comand = Split(comand.description, ',');
+
+        if(split_comand.size() > 2){
+            for(size_t i = 2; i < split_comand.size(); i++){
+                std::pair<std::string_view, size_t> temp = ParseDistance(split_comand[i]);
+                catalogue.SetDistBetweenStops(catalogue.GetStop(comand.id), catalogue.GetStop(temp.first), temp.second);
+            }
+        }
+    }
+
+    for(const input_reader::request::CommandDescription& comand : bus_buffer){
         std::vector<std::string_view> stop_names = ParseRoute(comand.description);
         std::vector<trans_cat::TransportCatalogue::Stop*> stops_for_bus;
         

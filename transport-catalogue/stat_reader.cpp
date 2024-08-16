@@ -16,7 +16,8 @@ void stat_reader::PrintBusProperty(const trans_cat::TransportCatalogue& transpor
     output  << "Bus "s << bus_id << ": "s
             << bus_stat.all_stop_count  << " stops on route, "s
             << bus_stat.uniq_stop_count << " unique stops, "s
-            << bus_stat.route_lenght    << " route length\n"s;
+            << bus_stat.route_lenght    << " route length, "s
+            << bus_stat.route_lenght / bus_stat.route_geo_lenght << " curvature\n";
 }
 
 void stat_reader::PrintStopProperty(const trans_cat::TransportCatalogue& tansport_catalogue, std::string_view stop_id, std::ostream& output){
