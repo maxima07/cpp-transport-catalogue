@@ -1,69 +1,68 @@
 #pragma once
 
 #include <deque>
+#include <map>
 #include <set>
 #include <string>
 #include <string_view>
 #include <vector>
 #include <unordered_map>
 
+#include "domain.h"
 #include "geo.h"
 
 namespace trans_cat {
 
 class TransportCatalogue {
 public:
-	struct Stop {
-		std::string stop_name;
-		geo::Coordinates stop_coord;
-	};
-	
-	struct Bus {
-		std::string bus_name;
-		std::vector<Stop*> stops_for_bus;
-	};
-
-	struct BusStat{
-		int all_stop_count 	= 0;
-		int uniq_stop_count = 0;
-		double route_geo_lenght = 0.0;
-		double route_lenght = 0.0;
-	};
-
 	struct DistHasher {
 	public:
-		size_t operator()(const std::pair<const Stop*, const Stop*>& stops) const;
+		size_t operator()(const std::pair<const domain::Stop*, const domain::Stop*>& stops) const;
 	private:
 		std::hash<const void*> dist_hasher_;
 	};
-		
 	
-	void AddBus (const std::string& bus_name, std::vector<Stop*>&& stops_for_bus); 				// Добавление в БД автобусов.
-	void AddStop (const std::string& stop_name, geo::Coordinates stop_coord); 					// Добавление в БД остановок.
-	void SetDistBetweenStops (const Stop* stop_from, const Stop* stop_to, size_t distance); 	// Добавление расстояния между двумя остановками
+	// Добавление автобусов / остановок / дистанций между остановками в БД
+	void AddBus (const std::string& bus_name, const std::vector<domain::Stop*>& stops_for_bus, bool is_roundtrip);
+	void AddStop (const std::string& stop_name, geo::Coordinates stop_coord);
+	void SetDistBetweenStops (const domain::Stop* stop_from, const domain::Stop* stop_to, size_t distance);
 
-	Bus* GetBus (std::string_view bus_name) const;
-	Stop* GetStop (std::string_view stop_name) const;
-	BusStat GetBusProperty (std::string_view bus_name) const; 									// Запрос свойств для конкретного автобуса
-	size_t GetDistBetweenStops (const Stop* stop_from, const Stop* stop_to) const; 				// Запрос расстояния между остановками
-	const std::set<std::string>& GetStopProperty(std::string_view stop_name) const; 			// Запрос списка автобусов для конкретной остановки
+	// Получение информации из БД
+
+	// Получение автобуса / остановки по имени
+	domain::Bus* GetBusByName (std::string_view bus_name) const;
+	domain::Stop* GetStopByName (std::string_view stop_name) const;
 	
+	// Запрос свойств для конкретного автобуса
+	domain::BusStat GetBusPropertyByName (std::string_view bus_name) const;
+
+	// Запрос свойств для конкретной остановки
+	const std::set<std::string>& GetStopPropertyByName(std::string_view stop_name) const;
+
+	// Получение расстояния между остановками
+	size_t GetDistBetweenStops (const domain::Stop* stop_from, const domain::Stop* stop_to) const;
+	
+	std::map<std::string_view, domain::Bus*> GetSortedBusDirectory () const;
+
 private:
-	std::deque<Bus> bus_data_;																	// БД автобусов
-	std::deque<Stop> stop_data_;																// БД остановок
-	std::unordered_map<std::string_view, Bus*> bus_directory_; 									// справочник автобусов
-	std::unordered_map<std::string_view, Stop*> stop_directory_;								// Справочник для остановок
-	std::unordered_map<std::string_view, std::set<std::string>> bus_list_for_stop_;				// Справочник автобусов для остановки
-	std::unordered_map<std::pair<const Stop*, const Stop*>, size_t, DistHasher> dist_directory_;// Справочник расстояний между остановками
+	// БД автобусов и остановок
+	std::deque<domain::Bus> bus_data_;
+	std::deque<domain::Stop> stop_data_;
 
+	// справочник автобусов / остановок
+	std::unordered_map<std::string_view, domain::Bus*> bus_directory_;
+	std::unordered_map<std::string_view, domain::Stop*> stop_directory_;
+
+	// Справочник автобусов для остановки
+	std::unordered_map<std::string_view, std::set<std::string>> bus_list_for_stop_;
+
+	// Справочник расстояний между остановками
+	std::unordered_map<std::pair<const domain::Stop*, const domain::Stop*>, size_t, DistHasher> dist_directory_;
 	
-	int GetBusAllStopCount (const TransportCatalogue::Bus& bus) const; 							// Запрос кол-ва всех остановок
-	double GetBusGeoRouteLength (const TransportCatalogue::Bus& bus) const; 					// Запрос длины маршрута по географическим координатам
-	double GetBusRouteLength (const TransportCatalogue::Bus& bus) const; 						// Запрос длины маршрута по фактическому пути
-	int GetBusUniqStopCount (const TransportCatalogue::Bus& bus) const; 						// Запрос кол-ва уникальных остановок
-	
-	
-	
+	int 	GetBusAllStopCount 	 (const domain::Bus& bus) const;
+	double	GetBusGeoRouteLength (const domain::Bus& bus) const;
+	int 	GetBusRouteLength 	 (const domain::Bus& bus) const;
+	int 	GetBusUniqStopCount  (const domain::Bus& bus) const;
 };
 
 }

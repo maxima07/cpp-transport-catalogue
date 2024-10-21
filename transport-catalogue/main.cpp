@@ -1,20 +1,41 @@
 #include <iostream>
-#include <string>
+#include <fstream>
+#include <cassert>
 
-#include "input_reader.h"
-#include "stat_reader.h"
-
-using namespace std;
+#include "json_reader.h"
+#include "transport_catalogue.h"
+#include "request_handler.h"
 
 int main() {
-    trans_cat::TransportCatalogue catalogue;
+    using namespace std::literals;
+    /*
+     * Примерная структура программы:
+     *
+     * Считать JSON из stdin
+     * Построить на его основе JSON базу данных транспортного справочника
+     * Выполнить запросы к справочнику, находящиеся в массива "stat_requests", построив JSON-массив
+     * с ответами Вывести в stdout ответы в виде JSON
+     */
 
-    {
-        input_reader::InputReader reader;
-        reader.ReadInput(cin, catalogue);
-    }
+    // std::string file ("D:\\DEV\\Sprint 10\\S10T1L15_3\\build\\Debug\\s10_final_opentest_1.json"s);
 
-    {
-        stat_reader::ReadAndProcessRequest(cin, cout, catalogue);
-    }
+    // std::ifstream inputFile(file, std::ios::in);
+    
+    // if (!inputFile.is_open())
+    //     std::cout << "failed to open " << file << '\n';
+    
+    // std::cin.rdbuf (inputFile.rdbuf());
+
+    trans_cat::TransportCatalogue tc;
+    json_reader::JsonReader reader(std::cin);
+
+    reader.BaseRequestProcessing(tc);
+
+    const auto& stat_request = reader.GetStatRequest ();
+    const auto& settings = reader.GetRenderSettings().AsMap();
+    const auto& render = reader.RenderSettingProcessing(settings);
+
+    req_handl::RequestHandler rh(tc, render);
+    rh.StatRequestProcessing (stat_request);
+    // rh.MapRender().Render(std::cout); 
 }
