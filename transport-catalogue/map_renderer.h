@@ -116,15 +116,15 @@ public:
         : render_settings_(settings){
     }
     
-    svg::Document GetMapRender (std::map<std::string_view, domain::Bus*> buses) const;
+    svg::Document GetMapRender (const std::map<std::string_view, domain::Bus*>& buses) const;
 
 private:
     RenderSettings render_settings_;
     
-    std::vector<svg::Polyline> DrawRoughtlines (const std::map<std::string_view, domain::Bus*> buses, const SphereProjector& projector) const;
-    std::vector<svg::Text> DrawBusNames (std::map<std::string_view, domain::Bus*> buses, const SphereProjector& projector) const;
-    std::vector<svg::Circle> DrawStopSymbols (std::map<std::string_view, domain::Stop*> all_stops, const SphereProjector& projector) const;
-    std::vector<svg::Text> DrawStopNames (std::map<std::string_view, domain::Stop*> all_stops, const SphereProjector& projector) const;
+    std::vector<svg::Polyline> DrawRoughtlines (const std::map<std::string_view, domain::Bus*>& buses, const SphereProjector& projector) const;
+    std::vector<svg::Text>     DrawBusNames    (const std::map<std::string_view, domain::Bus*>& buses, const SphereProjector& projector) const;
+    std::vector<svg::Circle>   DrawStopSymbols (const std::map<std::string_view, domain::Stop*>& all_stops, const SphereProjector& projector) const;
+    std::vector<svg::Text>     DrawStopNames   (const std::map<std::string_view, domain::Stop*>& all_stops, const SphereProjector& projector) const;
 };
 
 } // namespace map_render

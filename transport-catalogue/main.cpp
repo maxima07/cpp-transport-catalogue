@@ -29,13 +29,13 @@ int main() {
     trans_cat::TransportCatalogue tc;
     json_reader::JsonReader reader(std::cin);
 
-    reader.BaseRequestProcessing(tc);
+    reader.ProcessBaseRequest(tc);
 
     const auto& stat_request = reader.GetStatRequest ();
     const auto& settings = reader.GetRenderSettings().AsMap();
-    const auto& render = reader.RenderSettingProcessing(settings);
+    const auto& render = reader.ProcessRenderSetting(settings);
 
     req_handl::RequestHandler rh(tc, render);
-    rh.StatRequestProcessing (stat_request);
+    rh.ProcessStatRequest (stat_request);
     // rh.MapRender().Render(std::cout); 
 }

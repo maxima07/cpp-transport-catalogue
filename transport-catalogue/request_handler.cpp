@@ -5,7 +5,7 @@
 
 namespace req_handl {
 
-void RequestHandler::StatRequestProcessing (const json::Node& stat_request) const {
+void RequestHandler::ProcessStatRequest (const json::Node& stat_request) const {
     json::Array result;
     
     for (const auto& query : stat_request.AsArray()) {
@@ -72,8 +72,8 @@ json::Node RequestHandler::PrintBus (const StatRequest& request) const {
     if (bus != nullptr) {
         domain::BusStat bus_property = catalogue_.GetBusPropertyByName(bus->bus_name);
         dict["request_id"]        = request.id;
-        dict["curvature"]         = bus_property.route_lenght / bus_property.route_geo_lenght;
-        dict["route_length"]      = bus_property.route_lenght;
+        dict["curvature"]         = bus_property.route_length / bus_property.route_geo_lenght;
+        dict["route_length"]      = bus_property.route_length;
         dict["stop_count"]        = bus_property.all_stop_count;
         dict["unique_stop_count"] = bus_property.uniq_stop_count;
     } else {

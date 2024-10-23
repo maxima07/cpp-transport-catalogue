@@ -18,7 +18,7 @@ public:
         , map_renderer_(map_renderer) {
     }
 
-    void StatRequestProcessing (const json::Node& stat_request) const;
+    void ProcessStatRequest (const json::Node& stat_request) const;
     svg::Document MapRender () const;
 
 private:

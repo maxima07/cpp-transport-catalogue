@@ -14,7 +14,7 @@ bool IsZero(double value) {
     return std::abs(value) < EPSILON;
 }
 
-svg::Document MapRender::GetMapRender (std::map<std::string_view, domain::Bus*> buses) const {
+svg::Document MapRender::GetMapRender (const std::map<std::string_view, domain::Bus*>& buses) const {
     svg::Document result;
     std::vector<geo::Coordinates> bus_stops_coord;
     std::map<std::string_view, domain::Stop*> all_stops;
@@ -54,7 +54,7 @@ svg::Document MapRender::GetMapRender (std::map<std::string_view, domain::Bus*> 
     return result;
 }
 
-std::vector<svg::Polyline> MapRender::DrawRoughtlines (std::map<std::string_view, domain::Bus*> buses, const SphereProjector& projector) const {
+std::vector<svg::Polyline> MapRender::DrawRoughtlines (const std::map<std::string_view, domain::Bus*>& buses, const SphereProjector& projector) const {
     std::vector<svg::Polyline> result;
     size_t color_num = 0;
 
@@ -88,7 +88,7 @@ std::vector<svg::Polyline> MapRender::DrawRoughtlines (std::map<std::string_view
     return result;
 }
 
-std::vector<svg::Text> MapRender::DrawBusNames (std::map<std::string_view, domain::Bus*> buses, const SphereProjector& projector) const {
+std::vector<svg::Text> MapRender::DrawBusNames (const std::map<std::string_view, domain::Bus*>& buses, const SphereProjector& projector) const {
     using namespace std::literals;
     
     std::vector<svg::Text> result;
@@ -143,7 +143,7 @@ std::vector<svg::Text> MapRender::DrawBusNames (std::map<std::string_view, domai
     return result;
 }
 
-std::vector<svg::Circle> MapRender::DrawStopSymbols (std::map<std::string_view, domain::Stop*> all_stops, const SphereProjector& projector) const {
+std::vector<svg::Circle> MapRender::DrawStopSymbols (const std::map<std::string_view, domain::Stop*>& all_stops, const SphereProjector& projector) const {
     using namespace std::literals;
     std::vector<svg::Circle> result;
 
@@ -159,7 +159,7 @@ std::vector<svg::Circle> MapRender::DrawStopSymbols (std::map<std::string_view, 
     return result;
 }
 
-std::vector<svg::Text> MapRender::DrawStopNames (std::map<std::string_view, domain::Stop*> all_stops, const SphereProjector& projector) const {
+std::vector<svg::Text> MapRender::DrawStopNames (const std::map<std::string_view, domain::Stop*>& all_stops, const SphereProjector& projector) const {
     using namespace std::literals;
     std::vector<svg::Text> result;
     svg::Text stop_underlayer;

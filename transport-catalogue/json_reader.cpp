@@ -37,7 +37,7 @@ const json::Node& JsonReader::GetRenderSettings() {
     return null_;
 }
 
-void JsonReader::BaseRequestProcessing (trans_cat::TransportCatalogue& catalogue) {
+void JsonReader::ProcessBaseRequest (trans_cat::TransportCatalogue& catalogue) {
     const json::Array& request = GetBaseRequest().AsArray();
     std::vector<json::Node> bus_buffer;
     std::vector<json::Node> stop_buffer;
@@ -70,7 +70,7 @@ void JsonReader::BaseRequestProcessing (trans_cat::TransportCatalogue& catalogue
     }
 }
 
-map_render::RenderSettings json_reader::JsonReader::RenderSettingProcessing (const json::Dict& request) {
+map_render::RenderSettings json_reader::JsonReader::ProcessRenderSetting (const json::Dict& request) {
     map_render::RenderSettings render_settings;
 
     render_settings.width = request.at("width").AsDouble();

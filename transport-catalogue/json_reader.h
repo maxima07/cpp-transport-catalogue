@@ -32,10 +32,10 @@ public:
     const json::Node& GetRenderSettings();
     
     // Обрабока base_processing, заполнение транспортного каталога
-    void BaseRequestProcessing (trans_cat::TransportCatalogue& catalogue);
+    void ProcessBaseRequest (trans_cat::TransportCatalogue& catalogue);
 
     // Заполнение настроек рендера renderer_settings
-    map_render::RenderSettings RenderSettingProcessing (const json::Dict& request);
+    map_render::RenderSettings ProcessRenderSetting (const json::Dict& request);
 
 private:
     json::Document input_;
