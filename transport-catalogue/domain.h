@@ -21,7 +21,7 @@ struct Bus {
 struct BusStat{
     int all_stop_count 	= 0;
     int uniq_stop_count = 0;
-    double route_geo_lenght = 0.0;
+    double route_geo_length = 0.0;
     int route_length = 0;
 };
 

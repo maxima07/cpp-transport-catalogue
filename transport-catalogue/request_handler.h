@@ -1,6 +1,7 @@
 #pragma once
 
 #include "transport_catalogue.h"
+#include "json_builder.h"
 #include "json_reader.h"
 
 namespace req_handl {

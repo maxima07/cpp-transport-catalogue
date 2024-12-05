@@ -43,54 +43,76 @@ svg::Document RequestHandler::MapRender () const {
 }
 
 json::Node RequestHandler::PrintStop (const StatRequest& request) const {
-    using namespace std::literals;
-    json::Dict dict;
-    
-    const auto& stop = catalogue_.GetStopByName(request.name);
-    dict["request_id"] = request.id;
+    json::Node result;
 
-    if (stop != nullptr) {
+    const int request_id = request.id;
+    const std::string& stop_name = request.name;
+
+    if (catalogue_.GetStopByName (stop_name) != nullptr) {
         json::Array buses;
-       
-        for (const auto& bus_name : catalogue_.GetStopPropertyByName(stop->stop_name)) {
+
+        for (const auto& bus_name : catalogue_.GetStopPropertyByName(stop_name)) {
             buses.push_back(json::Node(bus_name));
         }
 
-        dict["buses"] = buses;
+        result = json::Builder {}
+            .StartDict()
+                .Key("request_id").Value(request_id)
+                .Key("buses").Value(buses)
+            .EndDict()
+        .Build();
+    
     } else {
-        dict["error_message"]     = "not found"s;
+        result = json::Builder {}
+            .StartDict()
+                .Key("request_id").Value(request_id)
+                .Key("error_message").Value("not found")
+            .EndDict()
+        .Build();
     }
-    return json::Node{dict};
+    return result;
 }
 
 json::Node RequestHandler::PrintBus (const StatRequest& request) const {
-    using namespace std::literals;
-    json::Dict dict;
-    const auto& bus = catalogue_.GetBusByName(request.name);
-    dict["request_id"] = request.id;
+    json::Node result;
 
-    if (bus != nullptr) {
-        domain::BusStat bus_property = catalogue_.GetBusPropertyByName(bus->bus_name);
-        dict["request_id"]        = request.id;
-        dict["curvature"]         = bus_property.route_length / bus_property.route_geo_lenght;
-        dict["route_length"]      = bus_property.route_length;
-        dict["stop_count"]        = bus_property.all_stop_count;
-        dict["unique_stop_count"] = bus_property.uniq_stop_count;
+    const int request_id = request.id;
+    const std::string& bus_name = request.name;
+
+    if (catalogue_.GetBusByName(bus_name) != nullptr) {
+        domain::BusStat bus_property = catalogue_.GetBusPropertyByName(bus_name);
+
+        result = json::Builder{}
+            .StartDict()
+                .Key("request_id").Value(request.id)
+                .Key("curvature").Value(bus_property.route_length / bus_property.route_geo_length)
+                .Key("route_length").Value(bus_property.route_length)
+                .Key("stop_count").Value(bus_property.all_stop_count)
+                .Key("unique_stop_count").Value(bus_property.uniq_stop_count)
+            .EndDict()
+        .Build();
+
     } else {
-        dict["error_message"]     = "not found"s;
+        result = json::Builder {}
+            .StartDict()
+                .Key("request_id").Value(request_id)
+                .Key("error_message").Value("not found")
+            .EndDict()
+        .Build();
     }
-    return json::Node{dict};
+    return result;
 }
 
 json::Node RequestHandler::PrintMap (const StatRequest& request) const {
-    json::Dict dict;
-
     std::ostringstream strm;
     svg::Document map = MapRender();
     map.Render (strm);
-    dict["request_id"] = request.id;
-    dict["map"] = strm.str();
-    return json::Node{dict};
+    return json::Builder{}
+        .StartDict()
+            .Key("request_id").Value(request.id)
+            .Key("map").Value(strm.str())
+        .EndDict()
+    .Build();
 }
 
 } // namespace req_handl
