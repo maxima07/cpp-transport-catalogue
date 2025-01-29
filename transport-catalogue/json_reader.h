@@ -1,13 +1,14 @@
 #pragma once
 
-#include "json.h"
-#include "map_renderer.h"
-#include "transport_catalogue.h"
-
 #include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include "json.h"
+#include "map_renderer.h"
+#include "transport_router.h"
+#include "transport_catalogue.h"
 
 namespace json_reader {
 
@@ -15,6 +16,7 @@ enum class RequestType {
     Bus,
     Stop,
     Map,
+    Route,
     Unknown
 };
 
@@ -30,12 +32,16 @@ public:
     const json::Node& GetBaseRequest();
     const json::Node& GetStatRequest();
     const json::Node& GetRenderSettings();
+    const json::Node& GetRouteSettings();
     
     // Обрабока base_processing, заполнение транспортного каталога
     void ProcessBaseRequest (trans_cat::TransportCatalogue& catalogue);
 
     // Заполнение настроек рендера renderer_settings
     map_render::RenderSettings ProcessRenderSetting (const json::Dict& request);
+
+    // Заполнение настроек пути router_settings
+    transport_router::RouteSettings ProcessRouterSetting (const json::Dict& request);
 
 private:
     json::Document input_;

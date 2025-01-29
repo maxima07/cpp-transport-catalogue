@@ -12,6 +12,8 @@ RequestType GetRequestType (std::string request){
         return RequestType::Bus;
     } else if (request == "Map"){
         return RequestType::Map;
+    } else if (request == "Route") {
+        return RequestType::Route;
     }
     return RequestType::Unknown;
 }
@@ -37,6 +39,13 @@ const json::Node& JsonReader::GetRenderSettings() {
     return null_;
 }
 
+const json::Node& JsonReader::GetRouteSettings() {
+    if (input_.GetRoot().AsMap().count("routing_settings")) {
+        return input_.GetRoot().AsMap().at("routing_settings");
+    }
+    return null_;
+}
+
 void JsonReader::ProcessBaseRequest (trans_cat::TransportCatalogue& catalogue) {
     const json::Array& request = GetBaseRequest().AsArray();
     std::vector<json::Node> bus_buffer;
@@ -57,6 +66,9 @@ void JsonReader::ProcessBaseRequest (trans_cat::TransportCatalogue& catalogue) {
             case RequestType::Map : {
                 break;
             }
+            case RequestType::Route : {
+                break;
+            }
             case RequestType::Unknown : {
                 break;
             }
@@ -73,19 +85,19 @@ void JsonReader::ProcessBaseRequest (trans_cat::TransportCatalogue& catalogue) {
 map_render::RenderSettings json_reader::JsonReader::ProcessRenderSetting (const json::Dict& request) {
     map_render::RenderSettings render_settings;
 
-    render_settings.width = request.at("width").AsDouble();
-    render_settings.height = request.at("height").AsDouble();
-    render_settings.padding = request.at("padding").AsDouble();
+    render_settings.width       = request.at("width").AsDouble();
+    render_settings.height      = request.at("height").AsDouble();
+    render_settings.padding     = request.at("padding").AsDouble();
     render_settings.line_windth = request.at("line_width").AsDouble();
     render_settings.stop_radius = request.at("stop_radius").AsDouble();
     render_settings.bus_label_font_size = request.at("bus_label_font_size").AsInt();
     
-    json::Array bus_label_offset = request.at("bus_label_offset").AsArray();
+    json::Array bus_label_offset     = request.at("bus_label_offset").AsArray();
     render_settings.bus_label_offset = {bus_label_offset[0].AsDouble(), bus_label_offset[1].AsDouble()};
     
     render_settings.stop_label_font_size = request.at("stop_label_font_size").AsInt();
     
-    json::Array stop_label_offset = request.at("stop_label_offset").AsArray();
+    json::Array stop_label_offset     = request.at("stop_label_offset").AsArray();
     render_settings.stop_label_offset = {stop_label_offset[0].AsDouble(), stop_label_offset[1].AsDouble()};
 
     if (request.at("underlayer_color").IsString()) {
@@ -106,7 +118,7 @@ map_render::RenderSettings json_reader::JsonReader::ProcessRenderSetting (const 
                                                          underlayer_color[3].AsDouble());
         }
     }
-    render_settings.underlayer_width   = request.at("underlayer_width").AsDouble();
+    render_settings.underlayer_width = request.at("underlayer_width").AsDouble();
 
     json::Array color_palette = request.at("color_palette").AsArray();
     for (const auto& color : color_palette) {
@@ -129,6 +141,16 @@ map_render::RenderSettings json_reader::JsonReader::ProcessRenderSetting (const 
         }
     }
     return render_settings;
+}
+
+transport_router::RouteSettings JsonReader::ProcessRouterSetting (const json::Dict& request) {
+    using namespace std::literals;
+    transport_router::RouteSettings route_settings;
+    
+    route_settings.bus_wait_time   = request.at("bus_wait_time"s).AsInt();
+    route_settings.bus_velocity    = request.at("bus_velocity"s).AsDouble();
+
+    return route_settings;
 }
 
 std::pair<std::string, geo::Coordinates> JsonReader::GetStopFromRequest (const json::Dict& request) {

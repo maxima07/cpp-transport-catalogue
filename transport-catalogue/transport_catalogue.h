@@ -42,15 +42,17 @@ public:
 	// Получение расстояния между остановками
 	size_t GetDistBetweenStops (const domain::Stop* stop_from, const domain::Stop* stop_to) const;
 	
-	std::map<std::string_view, domain::Bus*> GetSortedBusDirectory () const;
+	// Получение катологов для ладьнейшей обработки
+	const std::map<std::string_view, domain::Bus*>& GetBusDirectory () const;
+	const std::unordered_map<std::string_view, domain::Stop*>& GetStopDirectory () const;
 
 private:
 	// БД автобусов и остановок
-	std::deque<domain::Bus> bus_data_;
+	std::deque<domain::Bus>  bus_data_;
 	std::deque<domain::Stop> stop_data_;
 
 	// справочник автобусов / остановок
-	std::unordered_map<std::string_view, domain::Bus*> bus_directory_;
+	std::map<std::string_view, domain::Bus*> bus_directory_;
 	std::unordered_map<std::string_view, domain::Stop*> stop_directory_;
 
 	// Справочник автобусов для остановки

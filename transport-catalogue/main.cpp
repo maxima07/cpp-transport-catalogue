@@ -17,7 +17,10 @@ int main() {
      * с ответами Вывести в stdout ответы в виде JSON
      */
 
-    // std::string file ("D:\\DEV\\Sprint 10\\S10T1L15_3\\build\\Debug\\s10_final_opentest_1.json"s);
+
+    
+    // std::string file ("D:\\DEV_HOME\\S12T4L7\\build\\Debug\\test4.json"s);
+    // // std::string file ("D:\\DEV\\Sprint 12\\S12T4L7\\build\\Debug\\test6.txt"s);
 
     // std::ifstream inputFile(file, std::ios::in);
     
@@ -31,11 +34,17 @@ int main() {
 
     reader.ProcessBaseRequest(tc);
 
-    const auto& stat_request = reader.GetStatRequest ();
-    const auto& settings = reader.GetRenderSettings().AsMap();
-    const auto& render = reader.ProcessRenderSetting(settings);
+    const auto& render_settings_node = reader.GetRenderSettings().AsMap();
+    const auto& router_settings_node = reader.GetRouteSettings ().AsMap ();
 
-    req_handl::RequestHandler rh(tc, render);
-    rh.ProcessStatRequest (stat_request);
-    // rh.MapRender().Render(std::cout); 
+    const auto& render_settings = reader.ProcessRenderSetting (render_settings_node);
+    const auto& route_settings  = reader.ProcessRouterSetting (router_settings_node);
+
+    map_render::MapRender mr (render_settings);
+
+    transport_router::TransportRouter router (tc, route_settings);
+    
+    req_handl::RequestHandler rh (tc, mr, router);
+
+    rh.ProcessStatRequest (reader.GetStatRequest ());
 }
