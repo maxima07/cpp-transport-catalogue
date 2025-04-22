@@ -17,18 +17,6 @@ int main() {
      * с ответами Вывести в stdout ответы в виде JSON
      */
 
-
-    
-    // std::string file ("D:\\DEV_HOME\\S12T4L7\\build\\Debug\\test4.json"s);
-    // // std::string file ("D:\\DEV\\Sprint 12\\S12T4L7\\build\\Debug\\test6.txt"s);
-
-    // std::ifstream inputFile(file, std::ios::in);
-    
-    // if (!inputFile.is_open())
-    //     std::cout << "failed to open " << file << '\n';
-    
-    // std::cin.rdbuf (inputFile.rdbuf());
-
     trans_cat::TransportCatalogue tc;
     json_reader::JsonReader reader(std::cin);
 
